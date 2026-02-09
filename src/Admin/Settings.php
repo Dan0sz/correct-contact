@@ -40,6 +40,8 @@ class Settings {
 
     const SCAN_SOURCES = 'scan_sources';
 
+    const VALIDATION_RESULTS = 'validation_results';
+
     const SETUP_COMPLETED = 'cc_setup_completed';
 
     const SETUP_SKIPPED = 'cc_setup_skipped';
@@ -145,12 +147,18 @@ class Settings {
                 self::SETTINGS_FIELD_BULK_VALIDATION => [
                         'section_id'    => 'cc_bulk_validation_section',
                         'section_title' => __( 'Bulk Email Validation (Pro)', 'correct-contact' ),
-                        'intro'         => '<p>' . __( 'Scan email addresses used by WordPress and enabled one-click integrations and validate them in bulk. No data is removed automatically. You\'re in control.', 'correct-contact' ) . '</p>',
+                        'intro'         => '<p>' . __( 'Bulk Validation highlights potential issues. Scan email addresses used by WordPress and enabled one-click integrations and validate them in bulk. Editing or deleting records can be done in their original view. Your data is never removed.', 'correct-contact' ) . '</p>',
                         'settings'      => [
-                                self::SCAN_SOURCES => [
-                                        'label'             => __( 'Scan sources', 'correct-contact' ),
+                                self::SCAN_SOURCES       => [
+                                        'label'             => __( 'Scan Sources (Pro)', 'correct-contact' ),
                                         'callback'          => [ $this, 'render_scan_sources_field' ],
-                                        'desc'              => __( 'Select which integrations you want to scan.', 'correct-contact' ),
+                                        'desc'              => __( 'Select which integrations you want to scan. Available in CorrectContact Pro.', 'correct-contact' ),
+                                        'sanitize_callback' => null,
+                                ],
+                                self::VALIDATION_RESULTS => [
+                                        'label'             => __( 'Validation Results', 'correct-contact' ),
+                                        'callback'          => [ $this, 'render_validation_results_field' ],
+                                        'desc'              => '',
                                         'sanitize_callback' => null,
                                 ],
                         ],
@@ -432,6 +440,12 @@ class Settings {
                         'ninja-forms'      => 'Ninja Forms',
                         'wpforms'          => 'WPForms',
                 ],
+                __( 'Affiliate', 'correct-contact' ) => [
+                        'affiliate-wp'         => 'AffiliateWP',
+                        'easy-affiliate'       => 'Easy Affiliate',
+                        'slice-wp'             => 'SliceWP',
+                        'wp-affiliate-manager' => 'WP Affiliate Manager',
+                ],
         ];
     }
 
@@ -456,6 +470,94 @@ class Settings {
                 'cc-scan-sources-select-all',
                 $enabled_integrations
         );
+    }
+
+    /**
+     * Render validation results table.
+     */
+    public function render_validation_results_field( $args ) {
+        // Get current URL for sorting links
+        $current_url = set_url_scheme( 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] );
+        $current_url = remove_query_arg( 'paged', $current_url );
+
+        // Get current orderby and order from URL
+        $current_orderby = isset( $_GET['orderby'] ) ? sanitize_text_field( $_GET['orderby'] ) : '';
+        $current_order   = isset( $_GET['order'] ) && 'desc' === $_GET['order'] ? 'desc' : 'asc';
+
+        // Define columns with their orderby values
+        $columns = [
+                'email'  => __( 'Email address', 'correct-contact' ),
+                'source' => __( 'Source', 'correct-contact' ),
+                'status' => __( 'Status', 'correct-contact' ),
+        ];
+
+        ?>
+        <table class="wp-list-table widefat fixed striped table-view-list">
+            <thead>
+            <tr>
+                <?php
+                $is_first = true;
+                foreach ( $columns as $column_key => $column_name ) {
+                    // Determine classes
+                    $classes = [ 'manage-column', 'column-' . $column_key ];
+                    if ( $is_first ) {
+                        $classes[] = 'column-primary';
+                        $is_first  = false;
+                    }
+
+                    // Check if this column is currently sorted
+                    if ( $current_orderby === $column_key ) {
+                        $classes[] = 'sorted';
+                        $classes[] = $current_order;
+                        $order     = ( 'asc' === $current_order ) ? 'desc' : 'asc';
+                        $aria_sort = ( 'asc' === $current_order ) ? ' aria-sort="ascending"' : ' aria-sort="descending"';
+                    } else {
+                        $classes[] = 'sortable';
+                        $classes[] = 'desc';
+                        $order     = 'asc';
+                        $aria_sort = '';
+
+                        /* translators: Hidden accessibility text. */
+                        $order_text = ' <span class="screen-reader-text">' . __( 'Sort ascending.' ) . '</span>';
+                    }
+
+                    // Build the sortable link
+                    $column_display_name = sprintf(
+                            '<a href="%1$s">' .
+                            '<span>%2$s</span>' .
+                            '<span class="sorting-indicators">' .
+                            '<span class="sorting-indicator asc" aria-hidden="true"></span>' .
+                            '<span class="sorting-indicator desc" aria-hidden="true"></span>' .
+                            '</span>' .
+                            '%3$s' .
+                            '</a>',
+                            esc_url( add_query_arg( [ 'orderby' => $column_key, 'order' => $order ], $current_url ) ),
+                            $column_name,
+                            isset( $order_text ) ? $order_text : ''
+                    );
+
+                    printf(
+                            '<th scope="col" id="%1$s" class="%2$s"%3$s>%4$s</th>',
+                            esc_attr( $column_key ),
+                            esc_attr( implode( ' ', $classes ) ),
+                            $aria_sort,
+                            $column_display_name
+                    );
+
+                    unset( $order_text );
+                }
+                ?>
+            </tr>
+            </thead>
+            <tbody id="the-list">
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 20px;">
+                    <?php esc_html_e( 'Bulk Validation scans email addresses used by WordPress and one-click integrations. Available in CorrectContact Pro.', 'correct-contact' ); ?>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <?php
     }
 
     /**
@@ -631,7 +733,12 @@ class Settings {
                 ?>
             </div>
             <?php
-            submit_button( '', 'primary', 'submit', false );
+            // Customize submit button for Bulk Validation tab
+            if ( $tab_id === self::SETTINGS_FIELD_BULK_VALIDATION ) {
+                submit_button( __( 'Run Validation (Pro)', 'correct-contact' ), 'primary', 'submit', false, [ 'disabled' => 'disabled' ] );
+            } else {
+                submit_button( '', 'primary', 'submit', false );
+            }
 
             // Add "Run setup wizard again" button only on Advanced Settings tab
             if ( $tab_id === self::SETTINGS_FIELD_ADVANCED ) {

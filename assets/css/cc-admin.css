@@ -160,6 +160,10 @@
     font-weight: 600;
 }
 
+.cc-settings-container .form-table .widefat th {
+    font-weight: 400;
+}
+
 /**
  * Form Elements
  */
