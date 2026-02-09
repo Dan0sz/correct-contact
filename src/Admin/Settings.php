@@ -731,14 +731,15 @@ class Settings {
                 ?>
             </div>
             <?php
-            // Customize submit button for Bulk Validation tab
+            // Customize the submit button for the Bulk Validation tab
             if ( $tab_id === self::SETTINGS_FIELD_BULK_VALIDATION ) {
-                submit_button( __( 'Run Validation (Pro)', 'correct-contact' ), 'primary', 'submit', false, [ 'disabled' => 'disabled' ] );
+                $disabled = defined( 'CORRECT_CONTACT_PRO' ) ? [] : [ 'disabled' => 'disabled' ];
+                submit_button( __( 'Run Validation (Pro)', 'correct-contact' ), 'primary', 'submit', false, $disabled );
             } else {
                 submit_button( '', 'primary', 'submit', false );
             }
 
-            // Add "Run setup wizard again" button only on Advanced Settings tab
+            // Add the "Run setup wizard again" button only on Advanced Settings tab
             if ( $tab_id === self::SETTINGS_FIELD_ADVANCED ) {
                 ?>
                 <button type="button" class="button button-secondary cc-run-wizard-again" style="margin-left: 10px;">
