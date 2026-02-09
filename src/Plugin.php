@@ -11,8 +11,6 @@
 namespace CorrectContact;
 
 use CorrectContact\Admin\Settings;
-use CorrectContact\Options;
-use WpOrg\Requests\Exception\InvalidArgument;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,8 +24,6 @@ class Plugin {
 		new Admin\Notice();
 		new Admin\Settings();
 		new Ajax();
-		new Compatibility\EDD();
-		new Compatibility\WooCommerce();
 		
 		$this->init();
 	}

@@ -11,7 +11,6 @@
 namespace CorrectContact;
 
 use CorrectContact\Admin\Settings;
-use CorrectContact\Options;
 
 defined( 'ABSPATH' ) || exit;
 
