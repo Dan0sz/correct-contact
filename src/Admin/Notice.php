@@ -12,8 +12,6 @@ namespace CorrectContact\Admin;
 
 use CorrectContact\Helper;
 
-defined( 'ABSPATH' ) || exit;
-
 class Notice {
     /**
      * Notice constructor.

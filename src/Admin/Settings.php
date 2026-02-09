@@ -13,8 +13,6 @@ namespace CorrectContact\Admin;
 use CorrectContact\Helper;
 use CorrectContact\Options;
 
-defined( 'ABSPATH' ) || exit;
-
 class Settings {
     const OPTION_NAME = Options::OPTION_NAME;
 

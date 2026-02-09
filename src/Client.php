@@ -12,8 +12,6 @@ namespace CorrectContact;
 
 use CorrectContact\Admin\Settings;
 
-defined( 'ABSPATH' ) || exit;
-
 class Client {
 	/**
 	 * @var string Access Token

@@ -13,8 +13,6 @@ namespace CorrectContact\Admin\Wizard;
 use CorrectContact\Admin\Settings;
 use CorrectContact\Options;
 
-defined( 'ABSPATH' ) || exit;
-
 class Ajax {
 	
 	/**

@@ -10,8 +10,6 @@
 
 namespace CorrectContact;
 
-defined( 'ABSPATH' ) || exit;
-
 use CorrectContact\Admin\Settings;
 
 class Options {

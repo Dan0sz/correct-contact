@@ -12,8 +12,6 @@ namespace CorrectContact;
 
 use WpOrg\Requests\Exception\InvalidArgument;
 
-defined( 'ABSPATH' ) || exit;
-
 class Ajax {
 	const TRANSIENT_LABEL = 'cc_valid_%s';
 	
